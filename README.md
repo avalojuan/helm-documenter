@@ -61,7 +61,7 @@ Kubernetes Application Reduced Chart
 | global.image.pullPolicy | string | `"Always"` |  |
 | global.image.repository | string | `"example-repo"` |  |
 | global.image.tag | string | `"example-tag"` |  |
-| global.namespace | string | `"example-namespace"` |  |
+| global.namespace | string | `"example-namespace"` | Namespace where release will be deployed |
 | global.projectName | string | `"example-project"` |  |
 
 ----------------------------------------------
