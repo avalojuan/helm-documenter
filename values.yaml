@@ -15,7 +15,7 @@ global:
   # Cluster where release will be deployed
   clusterName: "example-cluster"
 
-  # Namespace where release will be deployed
+  # -- Namespace where release will be deployed
   namespace: "example-namespace"
 
 deployment:
