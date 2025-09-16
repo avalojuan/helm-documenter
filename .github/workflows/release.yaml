@@ -23,19 +23,29 @@ jobs:
           docker run --rm -v ${{ github.workspace }}:/helm-docs jnorwood/helm-docs:latest
 
       - name: Create new branch for README update
+        id: create_branch
         run: |
+          # Configure Git
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git checkout -b update-readme
+          
+          # Stage the README.md file
           git add README.md
+          
+          # Check for changes in staged files
           if git diff --cached --quiet; then
-            echo "No changes to commit."
+            echo "No changes in README.md. Skipping branch creation."
+            echo "::set-output name=has_changes::false"
           else
-            git commit -m "Update README using helm-docs"
+            # Create a new branch and commit the changes
+            git checkout -b update-readme
+            git commit -m "chore: Update documentation [skip ci]"
             git push origin update-readme
+            echo "::set-output name=has_changes::true"
           fi
 
       - name: Merge README branch into main without triggering workflow
+        if: steps.create_branch.outputs.has_changes == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
