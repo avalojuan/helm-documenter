@@ -1,0 +1,10 @@
+apiVersion: v2
+appVersion: latest
+name: base-chart
+version: 1.0.0
+description: Kubernetes Application Reduced Chart
+keywords:
+  - base-chart
+maintainers:
+  - name: Craftech
+    url: https://craftech.io/

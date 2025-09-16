@@ -1,0 +1,124 @@
+global:
+  # enabled is the master enabled switch. Setting this to true or false
+  # will enable or disable all the components within this chart by default.
+  enabled: true
+
+  # Used to define custom fullname in template.
+  projectName: "example-project"
+
+  # Image sets the repo,tag and pullPolicy of the project
+  image:
+    repository: "example-repo"
+    tag: "example-tag"
+    pullPolicy: "Always"
+
+  # Cluster where release will be deployed
+  clusterName: "example-cluster"
+
+  # Namespace where release will be deployed
+  namespace: "example-namespace"
+
+deployment:
+  # deployment.enabled -- True if you want to enable api deployment.
+  enabled: true
+  # -- Number of replicas
+  replicaCount: 1
+
+  containerName: "example-name"
+
+  command: '["/bin/bash", "-c"]'
+
+  commandArgs:
+    - example-command
+
+  securityContext: {}
+    # runAsUser: 1000
+
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+  labels: {}
+
+  annotations: {}
+
+  envFrom: []
+    # - secretRef:
+    #     name: test-secret
+
+  env: []
+    # - name: USERNAME
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: db-credentials-example-sm-secret
+    #       key: username
+    # - name: PASSWORD
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: db-credentials-example-sm-secret
+    #       key: password
+
+  volumes: []
+    # - name: data-volume
+
+  volumeMounts: []
+    # - name: data-volume
+    #   mountPath: /app/data
+
+  serviceAccount:
+    name: ""
+    enabled: true
+    annotations: {}
+
+  # Set the PostStart container hook command, this hook is executed immediately after a container is created.
+  lifecycleHook: {}
+    # postStartCommand: ["/bin/sh", "-c", "example-command"]
+
+  # Set the nodeSelector lifecycle type to "normal" to use AWS "on demand" resources, by default the value "spot" is used.
+  nodeSelector: {}
+    # node-lifecycle: "normal"
+
+  podAntiAffinity: {}
+
+  nodeAffinity: {}
+
+  tolerations: []
+    # - key: environment
+    #   operator: Equal
+    #   value: dev
+    #   effect: NoSchedule
+
+  resources:
+    requests:
+      cpu: 300m
+      memory: 800Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  terminationGracePeriodSeconds: 300
+  revisionHistoryLimit: 2
+
+  # extraEnvironmentVars is a list of extra enviroment variables to set with the stateful set.
+  extraEnvironmentVars: {}
+    # VAR1: value1
+    # VAR2: value2
+
+  livenessProbe:
+    enabled: true
+    path: /healthz
+    initialDelaySeconds: 15
+    periodSeconds: 20
+
+  readinessProbe:
+    enabled: true
+    path: /healthz
+    initialDelaySeconds: 15
+    periodSeconds: 20
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
