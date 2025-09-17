@@ -43,6 +43,14 @@ jobs:
           cat CHANGELOG.md >> temp.md
           mv temp.md CHANGELOG.md
           
+      - name: List files to verify CHANGELOG.md creation
+        run: ls -l
+
+      - name: Show contents of CHANGELOG.md
+        run: cat CHANGELOG.md
+
+      - name: Copy CHANGELOG.md to kube-app folder
+        run: cp CHANGELOG.md kube-app/CHANGELOG.md
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
