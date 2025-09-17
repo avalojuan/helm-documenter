@@ -23,6 +23,12 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+
       - name: Generate CHANGELOG.md from commits since last tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -36,17 +42,13 @@ jobs:
           echo "# New Release" > temp.md
           cat CHANGELOG.md >> temp.md
           mv temp.md CHANGELOG.md
+          
 
-      - name: Run chart-releaser with custom CHANGELOG
+      - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         with:
-          # Assumes your charts are in the root directory.
-          # If not, update this path.
           charts_dir: ./
-          # The key input to tell the action to use your generated file
-          config: |
-            charts_dir: ./
-            release_name_template: "{{ .Version }}"
-            release_notes_file: CHANGELOG.md
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_RELEASE_NAME_TEMPLATE: "{{ .Version }}"
+          CR_RELEASE_NOTES_FILE: CHANGELOG.md
