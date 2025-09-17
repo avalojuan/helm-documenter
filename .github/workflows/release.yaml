@@ -23,9 +23,22 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+      - name: Generate CHANGELOG.md from PR merge data
+        if: github.event_name == 'push'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr list --state merged --base main --json number,title,body,mergedAt --jq '
+          sort_by(.mergedAt) | reverse | 
+          map("## PR #" + (.number|tostring) + ": " + .title + "\n" + (.body // "") + "\nMerged at: " + .mergedAt + "\n") | 
+          join("\n---\n")
+          ' > CHANGELOG.md
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         with:
           charts_dir: ./
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_RELEASE_NAME_TEMPLATE: "{{ .Version }}"
+          CR_RELEASE_NOTES_FILE: CHANGELOG.md
