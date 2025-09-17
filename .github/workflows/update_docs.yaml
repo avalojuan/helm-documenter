@@ -29,8 +29,19 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
+      - name: Check last commit author and message
+        id: last_commit
+        run: |
+          AUTHOR=$(git log -1 --pretty=format:'%an')
+          MESSAGE=$(git log -1 --pretty=format:'%s')
+          if [[ "$AUTHOR" == "github-actions[bot]" && "$MESSAGE" == "docs: update README.md with helm-docs" ]]; then
+            echo "skip_commit=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip_commit=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Commit updated README.md to PR
-        if: steps.readme_diff.outputs.changed == 'true'
+        if: steps.readme_diff.outputs.changed == 'true' && steps.last_commit.outputs.skip_commit == 'false'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
