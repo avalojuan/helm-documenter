@@ -23,35 +23,6 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      - name: Get latest tag
-        id: get_tag
-        run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
-
-      - name: Generate CHANGELOG.md from commits since last tag
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Use `git log` to get a list of commits since the last tag
-          # and format them into a simple changelog.
-          # We're filtering for commits with a PR number.
-          git log ${{ env.LATEST_TAG }}..HEAD --pretty=format:"- %s" | grep '(#.*)' | sed 's/(#/- [#/' | sed 's/)/]/' > CHANGELOG.md
-          
-          # Add a header to the changelog file
-          echo "# New Release" > temp.md
-          cat CHANGELOG.md >> temp.md
-          mv temp.md CHANGELOG.md
-          
-      - name: List files to verify CHANGELOG.md creation
-        run: ls -l
-
-      - name: Show contents of CHANGELOG.md
-        run: cat CHANGELOG.md
-
-      - name: Copy CHANGELOG.md to kube-app folder
-        run: cp CHANGELOG.md kube-app/CHANGELOG.md
-
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         with:

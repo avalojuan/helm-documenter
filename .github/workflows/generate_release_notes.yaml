@@ -1,0 +1,47 @@
+name: Generate Release Notes
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  generate-changelog:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get PR description
+        id: pr_desc
+        run: |
+          echo "PR_DESCRIPTION<<EOF" >> $GITHUB_ENV
+          echo "${{ github.event.pull_request.body }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Get commit history
+        id: commits
+        run: |
+          git fetch origin main
+          COMMITS=$(git log origin/main..HEAD --pretty=format:"- %s (%an)")
+          echo "COMMITS<<EOF" >> $GITHUB_ENV
+          echo "$COMMITS" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Generate CHANGELOG.md
+        run: |
+          echo "# Changelog" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "## PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### Description" >> CHANGELOG.md
+          echo "${PR_DESCRIPTION}" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### Commits" >> CHANGELOG.md
+          echo "${COMMITS}" >> CHANGELOG.md
+
+      - name: Commit and push CHANGELOG.md
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: update CHANGELOG.md for PR #${{ github.event.pull_request.number }}"
+          file_pattern: CHANGELOG.md
