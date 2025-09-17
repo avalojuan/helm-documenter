@@ -27,3 +27,4 @@ _These properties are for automated release tooling and will not appear in the f
 ```yaml
 release_type: # [tiny, minor, major] - select one
 release_date: # YYYY-MM-DD
+```
