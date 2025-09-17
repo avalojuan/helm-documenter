@@ -14,14 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get commit history
-        id: commits
-        run: |
-          git fetch origin main
-          COMMITS=$(git log origin/main..HEAD --pretty=format:"- %s (%an)")
-          # This should also be a single line to avoid issues.
-          echo "COMMITS=$COMMITS" >> $GITHUB_ENV
-
       # Save multiline PR body into an environment variable safely
       - name: Save PR body to env
         run: |
@@ -32,8 +24,6 @@ jobs:
           EOF
 
       - name: Generate CHANGELOG.md from PR body
-        env:
-          COMMITS: ${{ env.COMMITS }}   # keep if you already set COMMITS earlier
         run: |
           {
             echo "# Changelog"
@@ -41,9 +31,6 @@ jobs:
             echo "### Description"
             # Use quoted variable expansion to preserve content exactly
             printf '%s\n' "$PR_BODY"
-            echo
-            echo "### Commits"
-            printf '%s\n' "$COMMITS"
           } > CHANGELOG.md
 
       - name: Show generated file (debug)
