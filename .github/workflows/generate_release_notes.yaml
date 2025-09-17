@@ -27,9 +27,7 @@ jobs:
           {
             echo "# Changelog"
             echo "### Description"
-            cat <<- 'EOF'
-            ${{ github.event.pull_request.body }}
-            EOF
+            echo "${{ github.event.pull_request.body }}"
             echo "### Commits"
             echo "${{ env.COMMITS }}"
           } > CHANGELOG.md
