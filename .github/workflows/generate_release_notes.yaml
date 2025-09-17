@@ -14,18 +14,17 @@ jobs:
       - name: Get PR description
         id: pr_desc
         run: |
-          echo "PR_DESCRIPTION<<EOF" >> $GITHUB_ENV
-          echo "${{ github.event.pull_request.body }}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          # The PR body is a single string and doesn't need a here document.
+          # Use `echo` to set it directly.
+          echo "PR_DESCRIPTION=${{ github.event.pull_request.body }}" >> $GITHUB_ENV
 
       - name: Get commit history
         id: commits
         run: |
           git fetch origin main
           COMMITS=$(git log origin/main..HEAD --pretty=format:"- %s (%an)")
-          echo "COMMITS<<EOF" >> $GITHUB_ENV
-          echo "$COMMITS" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          # This should also be a single line to avoid issues.
+          echo "COMMITS=$COMMITS" >> $GITHUB_ENV
 
       - name: Generate CHANGELOG.md
         run: |
@@ -34,10 +33,10 @@ jobs:
           echo "## PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
           echo "### Description" >> CHANGELOG.md
-          echo "${PR_DESCRIPTION}" >> CHANGELOG.md
+          echo "${{ env.PR_DESCRIPTION }}" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
           echo "### Commits" >> CHANGELOG.md
-          echo "${COMMITS}" >> CHANGELOG.md
+          echo "${{ env.COMMITS }}" >> CHANGELOG.md
 
       - name: Commit and push CHANGELOG.md
         uses: stefanzweifel/git-auto-commit-action@v5
