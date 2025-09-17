@@ -24,11 +24,16 @@ jobs:
 
       - name: Generate CHANGELOG.md
         run: |
-          echo "# Changelog" > CHANGELOG.md
-          echo "### Description" >> CHANGELOG.md
-          echo "PR_DESCRIPTION=${{ github.event.pull_request.body }}" >> CHANGELOG.md
-          echo "### Commits" >> CHANGELOG.md
-          echo "${{ env.COMMITS }}" >> CHANGELOG.md
+          {
+            echo "# Changelog"
+            echo "### Description"
+            cat <<- 'EOF'
+            ${{ github.event.pull_request.body }}
+            EOF
+            echo "### Commits"
+            echo "${{ env.COMMITS }}"
+          } > CHANGELOG.md
+
 
       - name: Commit and push CHANGELOG.md
         uses: stefanzweifel/git-auto-commit-action@v5
