@@ -23,22 +23,30 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      - name: Generate CHANGELOG.md from PR merge data
-        if: github.event_name == 'push'
+      - name: Generate CHANGELOG.md from commits since last tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr list --state merged --base main --json number,title,body,mergedAt --jq '
-          sort_by(.mergedAt) | reverse | 
-          map("## PR #" + (.number|tostring) + ": " + .title + "\n" + (.body // "") + "\nMerged at: " + .mergedAt + "\n") | 
-          join("\n---\n")
-          ' > CHANGELOG.md
+          # Use `git log` to get a list of commits since the last tag
+          # and format them into a simple changelog.
+          # We're filtering for commits with a PR number.
+          git log ${{ env.LATEST_TAG }}..HEAD --pretty=format:"- %s" | grep '(#.*)' | sed 's/(#/- [#/' | sed 's/)/]/' > CHANGELOG.md
+          
+          # Add a header to the changelog file
+          echo "# New Release" > temp.md
+          cat CHANGELOG.md >> temp.md
+          mv temp.md CHANGELOG.md
 
-      - name: Run chart-releaser
+      - name: Run chart-releaser with custom CHANGELOG
         uses: helm/chart-releaser-action@v1.7.0
         with:
+          # Assumes your charts are in the root directory.
+          # If not, update this path.
           charts_dir: ./
+          # The key input to tell the action to use your generated file
+          config: |
+            charts_dir: ./
+            release_name_template: "{{ .Version }}"
+            release_notes_file: CHANGELOG.md
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          CR_RELEASE_NAME_TEMPLATE: "{{ .Version }}"
-          CR_RELEASE_NOTES_FILE: CHANGELOG.md
