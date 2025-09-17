@@ -7,22 +7,18 @@ on:
 jobs:
   update-docs:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: './kube-app'
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
 
-      - name: Change to kube-app directory
-        run: cd kube-app
-        shell: bash
-
-      - name: PWD
-        run: pwd
-        shell: bash
-        
       - name: Save current README.md
-        run: cp README.md README.md.old
+        run: |
+          cp README.md README.md.old
 
       - name: Run helm-docs Docker image
         run: |
