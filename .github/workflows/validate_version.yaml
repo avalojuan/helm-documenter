@@ -11,6 +11,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Change to kube-app directory
+        run: cd kube-app
+        shell: bash
+
       - name: Get Chart version from Chart.yaml
         id: chart_version
         run: |
