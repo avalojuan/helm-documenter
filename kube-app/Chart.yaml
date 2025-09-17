@@ -2,7 +2,7 @@ apiVersion: v2
 appVersion: latest
 name: base-chart
 version: 1.0.3
-description: Kubernetes Application Reduced Chart
+description: Kubernetes Application Reduced Chart.
 keywords:
   - base-chart
 maintainers:
