@@ -1,0 +1,39 @@
+name: Validate Helm Chart Version
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  validate-chart-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get Chart version from Chart.yaml
+        id: chart_version
+        run: |
+          CHART_VERSION=$(yq '.version' ./Chart.yaml)
+          echo "chart_version=$CHART_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get latest release version from GitHub
+        id: latest_release
+        run: |
+          LATEST_RELEASE=$(gh release view --json tagName -q '.tagName' || echo "0.0.0")
+          echo "latest_release=$LATEST_RELEASE" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compare Chart version with latest release
+        run: |
+          compare_versions() {
+            # Returns 0 if $1 > $2
+            [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" != "$1" ]
+          }
+          CHART_VERSION="${{ steps.chart_version.outputs.chart_version }}"
+          LATEST_RELEASE="${{ steps.latest_release.outputs.latest_release }}"
+          if ! compare_versions "$CHART_VERSION" "$LATEST_RELEASE"; then
+            echo "Chart version ($CHART_VERSION) must be greater than latest release ($LATEST_RELEASE)."
+            exit 1
+          fi
