@@ -22,16 +22,30 @@ jobs:
           # This should also be a single line to avoid issues.
           echo "COMMITS=$COMMITS" >> $GITHUB_ENV
 
-      - name: Generate CHANGELOG.md
+      # Save multiline PR body into an environment variable safely
+      - name: Save PR body to env
+        run: |
+          echo "PR_BODY<<EOF" >> $GITHUB_ENV
+          printf '%s\n' "${{ github.event.pull_request.body }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Generate CHANGELOG.md from PR body
+        env:
+          COMMITS: ${{ env.COMMITS }}   # keep if you already set COMMITS earlier
         run: |
           {
             echo "# Changelog"
+            echo
             echo "### Description"
-            echo "${{ github.event.pull_request.body }}"
+            # Use quoted variable expansion to preserve content exactly
+            printf '%s\n' "$PR_BODY"
+            echo
             echo "### Commits"
-            echo "${{ env.COMMITS }}"
+            printf '%s\n' "$COMMITS"
           } > CHANGELOG.md
 
+      - name: Show generated file (debug)
+        run: cat CHANGELOG.md
 
       - name: Commit and push CHANGELOG.md
         uses: stefanzweifel/git-auto-commit-action@v5
