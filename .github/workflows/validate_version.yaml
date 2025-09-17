@@ -33,7 +33,9 @@ jobs:
           }
           CHART_VERSION="${{ steps.chart_version.outputs.chart_version }}"
           LATEST_RELEASE="${{ steps.latest_release.outputs.latest_release }}"
-          if ! compare_versions "$CHART_VERSION" "$LATEST_RELEASE"; then
+          # Remove leading 'v' if present
+          LATEST_RELEASE_STRIPPED="${LATEST_RELEASE#v}"
+          if ! compare_versions "$CHART_VERSION" "$LATEST_RELEASE_STRIPPED"; then
             echo "Chart version ($CHART_VERSION) must be greater than latest release ($LATEST_RELEASE)."
             exit 1
           fi
