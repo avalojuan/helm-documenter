@@ -28,8 +28,6 @@ _List any changes that could break backward compatibility. Describe the impact a
 _These properties are for automated release tooling and will not appear in the final release notes._
 
 ```yaml
-release_type: # [tiny, minor, major] - select one
-release_date: # YYYY-MM-DD
-
-### Commits
-- Merge eed0e2adf9d5967d325035ac2eb885812f011e42 into c78fecd3254bfe885573658ff2545138655256cb (Avalo Juan)
+release_type: tiny
+release_date: 2025-12-12
+```
