@@ -25,9 +25,11 @@ jobs:
       # Save multiline PR body into an environment variable safely
       - name: Save PR body to env
         run: |
-          echo "PR_BODY<<EOF" >> $GITHUB_ENV
-          printf '%s\n' "${{ github.event.pull_request.body }}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          cat <<'EOF' >> $GITHUB_ENV
+          PR_BODY<<EOT
+          ${{ github.event.pull_request.body }}
+          EOT
+          EOF
 
       - name: Generate CHANGELOG.md from PR body
         env:
