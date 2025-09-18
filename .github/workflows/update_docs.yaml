@@ -1,4 +1,4 @@
-name: Update Helm Docs
+name: Update Helm Docs and Release Notes
 
 on:
   pull_request_review:
@@ -12,44 +12,41 @@ jobs:
       run:
         working-directory: './kube-app'
     steps:
+
       - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Save current README.md
-        run: |
-          cp README.md README.md.old
-
-      - name: Run helm-docs Docker image
+      # README Generation Steps
+      - name: Generate Helm Docs README.md
         run: |
           docker run --rm -v ${{ github.workspace }}:/helm-docs jnorwood/helm-docs:latest
 
-      - name: Compare README.md files
-        id: readme_diff
+      # Release Notes Generation Steps
+      - name: Save PR body to env
         run: |
-          if cmp -s README.md README.md.old; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
+          cat <<'EOF' >> $GITHUB_ENV
+          PR_BODY<<EOT
+          ${{ github.event.pull_request.body }}
+          EOT
+          EOF
 
-      - name: Check last commit author and message
-        id: last_commit
+      - name: Generate Release Notes CHANGELOG.md from PR body
         run: |
-          AUTHOR=$(git log -1 --pretty=format:'%an')
-          MESSAGE=$(git log -1 --pretty=format:'%s')
-          if [[ "$AUTHOR" == "github-actions[bot]" && "$MESSAGE" == "docs: update README.md with helm-docs" ]]; then
-            echo "skip_commit=true" >> $GITHUB_OUTPUT
-          else
-            echo "skip_commit=false" >> $GITHUB_OUTPUT
-          fi
+          {
+            echo "# Changelog"
+            echo
+            echo "### Description"
+            # Use quoted variable expansion to preserve content exactly
+            printf '%s\n' "$PR_BODY"
+          } > CHANGELOG.md
 
-      - name: Commit updated README.md to PR
-        if: steps.readme_diff.outputs.changed == 'true' && steps.last_commit.outputs.skip_commit == 'false'
+      # Commit Changes
+      - name: Commit updated README.md and CHANGELOG.md to PR
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md
-          git commit -m "docs: update README.md with helm-docs"
-          git push origin HEAD:${{ github.head_ref }}
+          git add README.md CHANGELOG.md
+          git commit -m "docs: update README.md and CHANGELOG.md"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}

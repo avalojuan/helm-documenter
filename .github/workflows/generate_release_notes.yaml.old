@@ -1,0 +1,47 @@
+# name: Generate Release Notes
+
+# on:
+#   pull_request_review:
+#     types: [submitted]
+
+# jobs:
+#   generate-changelog:
+#     if: github.event.review.state == 'approved'
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         working-directory: './kube-app'
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       # Save multiline PR body into an environment variable safely
+#       - name: Save PR body to env
+#         run: |
+#           cat <<'EOF' >> $GITHUB_ENV
+#           PR_BODY<<EOT
+#           ${{ github.event.pull_request.body }}
+#           EOT
+#           EOF
+
+#       - name: Generate CHANGELOG.md from PR body
+#         run: |
+#           {
+#             echo "# Changelog"
+#             echo
+#             echo "### Description"
+#             # Use quoted variable expansion to preserve content exactly
+#             printf '%s\n' "$PR_BODY"
+#           } > CHANGELOG.md
+
+#       - name: Show generated file (debug)
+#         run: |
+#           echo "Current directory:"
+#           pwd
+#           cat CHANGELOG.md
+
+#       - name: Commit and push CHANGELOG.md
+#         uses: stefanzweifel/git-auto-commit-action@v5
+#         with:
+#           commit_message: "docs: update CHANGELOG.md for PR #${{ github.event.pull_request.number }}"
+#           file_pattern: '*CHANGELOG.md'
