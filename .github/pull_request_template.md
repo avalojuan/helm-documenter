@@ -1,19 +1,27 @@
-### Release Notes
+# 🚀 Release Notes
 
-_This PR will serve as the basis for the Release Notes. Please fill out the sections below to ensure all key changes are captured._
-
----
-
-### Summary of Changes
-
-_A high-level overview of the new features, bug fixes, and improvements included in this release. Use bullet points and link to relevant issues or PRs._
-
-- New feature:
-- Bug fix:
-- Improvement:
+## 📌 Summary
+<!-- Provide a brief summary of the changes introduced by this PR -->
 
 ---
 
-### Breaking Changes
+## 🔧 Changes
+<!-- List the main changes made in this PR -->
+- [x] Feature added
+- [ ] Bug fixed
+- [ ] Documentation updated
+- [ ] Other (please describe)
 
-_List any changes that could break backward compatibility. Describe the impact and provide clear migration instructions._
+---
+
+## 📖 Description
+<!-- Add user-facing release notes here. These will be appended to the chart’s release notes -->
+
+### ✨ New Features
+-
+
+### 🐛 Bug Fixes
+-
+
+### 📚 Documentation
+-
