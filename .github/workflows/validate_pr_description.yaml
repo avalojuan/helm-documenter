@@ -13,33 +13,49 @@ jobs:
         PR_BODY: ${{ github.event.pull_request.body }}
       run: |
         echo "Checking PR body for required content..."
-
-        # Use a safer method for cleaning the body
-        CLEANED_BODY=$(echo "$PR_BODY" | sed 's///g')
         
         # 1. Check if Summary section is filled
-        # Use a non-greedy regex to prevent matching across multiple sections
-        SUMMARY_CONTENT=$(echo "$CLEANED_BODY" | sed -n '/## 📌 Summary/,/---/p' | sed '1d;$d' | tr -d '[:space:]')
+        # Extract text between "## 📌 Summary" and "---" and remove whitespace.
+        SUMMARY_CONTENT=$(echo "$PR_BODY" | awk '/## 📌 Summary/,/---/' | sed '1d;$d' | tr -d '[:space:]')
         if [ -z "$SUMMARY_CONTENT" ]; then
           echo "Error: The 'Summary' section is empty."
           exit 1
+        else
+          echo "Summary section is filled."
         fi
 
-        # 2. Check if at least one checkbox is checked
-        CHECKED_BOXES=$(echo "$CLEANED_BODY" | grep -c '^- \[x\]')
-        if [ "$CHECKED_BOXES" -lt 1 ]; then
-          echo "Error: At least one checkbox under 'Changes' must be checked."
+        echo "Checking for checked boxes in 'Changes' section..."
+
+        # Grab section after "## 🔧 Changes"
+        CHANGES_SECTION=$(echo "$PR_BODY" | grep -A20 "## 🔧 Changes")
+
+        # Safety: ensure section is not empty
+        if [ -z "$CHANGES_SECTION" ]; then
+          echo "❌ Error: Could not find 'Changes' section in PR body"
           exit 1
+        else
+            echo "✅ Changes section found."
+        fi
+
+        # Count checkboxes
+        if ! echo "$CHANGES_SECTION" | grep -q '^- \[x\]'; then
+          echo "❌ Error: No checkboxes found under 'Changes' section."
+          exit 1
+        else
+          echo "✅ At least one checkbox is checked."
         fi
 
         # 3. Check if one description type is filled
-        # Extract the Description section
-        DESCRIPTION_SECTION=$(echo "$CLEANED_BODY" | sed -n '/## 📖 Description/,//p')
-        
-        # Check if any of the sub-sections have content
+        # Extract the entire "Description" section
+        DESCRIPTION_SECTION=$(echo "$PR_BODY" | sed -n '/## 📖 Description/,//p')
+
+        # Check if any of the sub-sections have content.
+        # 'sed' removes the sub-headers, and 'grep' checks for any alphanumeric characters.
         if ! echo "$DESCRIPTION_SECTION" | sed 's/###.*//' | grep -q '[[:alnum:]]'; then
-            echo "Error: At least one of the 'New Features', 'Bug Fixes', or 'Documentation' sections must be filled."
-            exit 1
+          echo "Error: At least one of the 'New Features', 'Bug Fixes', or 'Documentation' sections must be filled."
+          exit 1
+        else
+            echo "✅ At least one description section is filled."
         fi
-        
-        echo "PR template validation passed. All required sections are filled correctly."
+
+        echo "✅ PR template validation passed. All required sections are filled correctly."
