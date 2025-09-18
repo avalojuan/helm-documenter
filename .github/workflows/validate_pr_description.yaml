@@ -8,37 +8,38 @@ jobs:
   validate-pr-description:
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Get PR Body
-        id: pr
-        uses: actions-ecosystem/action-get-merged-pull-request@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🕵️ Validate Release Notes
+      - name: Validate PR body content
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          BODY=$(echo "${{ steps.pr.outputs.body }}")
+          echo "Checking PR body for required content..."
 
-          echo "🔎 Checking Summary..."
-          SUMMARY_CONTENT=$(echo "$BODY" | awk '/## 📌 Summary/{flag=1;next}/---/{flag=0}flag' | grep -vE "^\s*<!--" | grep -vE "^\s*$")
+          # Remove HTML comments to not mistake them for content
+          CLEANED_BODY=$(echo "$PR_BODY" | sed 's///g')
+
+          # 1. Check if Summary section is filled
+          SUMMARY_CONTENT=$(echo "$CLEANED_BODY" | awk '/## 📌 Summary/,/---/' | sed '1d;$d' | tr -d '[:space:]')
           if [ -z "$SUMMARY_CONTENT" ]; then
-          echo "❌ Summary section is empty"
-          exit 1
-          fi
-
-          echo "🔎 Checking Changes..."
-          if ! echo "$BODY" | grep -q "\- \[x\]"; then
-            echo "❌ No change type has been checked"
+            echo "Error: The 'Summary' section is empty."
             exit 1
           fi
 
-          echo "🔎 Checking Description..."
-          FEATURES=$(echo "$BODY" | awk '/### ✨ New Features/{getline; print}')
-          BUGS=$(echo "$BODY" | awk '/### 🐛 Bug Fixes/{getline; print}')
-          DOCS=$(echo "$BODY" | awk '/### 📚 Documentation/{getline; print}')
-
-          if [[ "$FEATURES" =~ ^\-$ ]] && [[ "$BUGS" =~ ^\-$ ]] && [[ "$DOCS" =~ ^\-$ ]]; then
-            echo "❌ All description sections are empty"
+          # 2. Check if at least one checkbox is checked
+          CHECKED_BOXES=$(echo "$CLEANED_BODY" | grep '^- \[x\]' | wc -l)
+          if [ "$CHECKED_BOXES" -lt 1 ]; then
+            echo "Error: At least one checkbox under 'Changes' must be checked."
             exit 1
           fi
 
-          echo "✅ Release notes validation passed!"
+          # 3. Check if one description type is filled
+          DESCRIPTION_CONTENT=$(echo "$CLEANED_BODY" | awk '/## 📖 Description/,//' | grep -E '### (✨ New Features|🐛 Bug Fixes|📚 Documentation)' -A 1)
+          FILLED_DESCRIPTION=false
+          if echo "$DESCRIPTION_CONTENT" | sed 's/.*: -//' | grep -v '^-'; then
+            FILLED_DESCRIPTION=true
+          fi
+          if [ "$FILLED_DESCRIPTION" = "false" ]; then
+            echo "Error: At least one of the 'New Features', 'Bug Fixes', or 'Documentation' sections must be filled."
+            exit 1
+          fi
+
+          echo "PR template validation passed. All required sections are filled correctly."
