@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - ./kube-app/README.md
+      - 'kube-app/README.md'
 
 jobs:
   update-gh-pages:
