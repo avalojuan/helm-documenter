@@ -28,6 +28,6 @@ _List any changes that could break backward compatibility. Describe the impact a
 _These properties are for automated release tooling and will not appear in the final release notes._
 
 ```yaml
-release_type: tiny
-release_date: 2025-12-12
+release_type: # [tiny, minor, major] - select one
+release_date: # YYYY-MM-DD
 ```

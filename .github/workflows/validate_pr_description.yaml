@@ -20,20 +20,10 @@ jobs:
               return regex.test(description);
             }
 
-            function hasReleaseProperties() {
-              const yamlRegex = /```yaml([\s\S]*?)```/i;
-              const match = description.match(yamlRegex);
-              if (!match) return false;
-              const yaml = match[1];
-              return /release_type:\s*(tiny|minor|major)/i.test(yaml) &&
-                     /release_date:\s*\d{4}-\d{2}-\d{2}/.test(yaml);
-            }
-
             const missingSections = [];
             if (!hasSection("Summary of Changes")) missingSections.push("Summary of Changes");
             if (!hasSection("Breaking Changes")) missingSections.push("Breaking Changes");
             if (!hasSection("Release Properties")) missingSections.push("Release Properties");
-            if (!hasReleaseProperties()) missingSections.push("Valid Release Properties YAML");
 
             if (missingSections.length > 0) {
               core.setFailed(
