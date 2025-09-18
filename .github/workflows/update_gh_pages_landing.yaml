@@ -1,38 +1,34 @@
-name: Update gh-pages Landing
+name: Publish README to gh-pages
 
 on:
   push:
     branches:
       - main
-    paths:
-      - 'kube-app/README.md'
 
 jobs:
-  update-gh-pages:
+  publish-readme:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout main branch
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Set up Git user
+      - name: 🚀 Push README to gh-pages
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          # Make sure gh is authenticated
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
 
-      - name: Fetch gh-pages branch
-        run: git fetch origin gh-pages:gh-pages
+          # Switch to gh-pages branch
+          git fetch origin gh-pages
+          git checkout gh-pages
 
-      - name: Switch to gh-pages branch
-        run: git checkout gh-pages
+          # Copy README from main
+          git checkout main -- kube-app/README.md
+          mv kube-app/README.md README.md
+          rm -rf kube-app
 
-      - name: Copy README.md from main
-        run: cp ../README.md ./README.md
-
-      - name: Commit and push changes
-        run: |
+          # Commit and push
           git add README.md
-          git commit -m "Update README.md from main"
+          git commit -m "docs: update README from main branch" || echo "No changes to commit"
           git push origin gh-pages
-        continue-on-error: true
