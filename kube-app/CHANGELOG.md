@@ -5,7 +5,7 @@
 
 ## 📌 Summary
 <!-- Provide a brief summary of the changes introduced by this PR -->
-Bump char version
+Test: complete workflow
 
 ---
 
@@ -15,11 +15,11 @@ Bump char version
 - [ ] Bug fixed
 - [ ] Documentation updated
 - [x] Other (please describe)
-Only bump version
+Test workflow
 ---
 
 ## 📖 Description
 <!-- Add user-facing release notes here. These will be appended to the chart’s release notes -->
 
-### 🐛 Bug Fixes
-- test: char bump
+### 📚 Documentation
+- See description in Notion
