@@ -12,7 +12,7 @@
 
 ## Maintainers
 
-| Name | Email | Url |
+| Name | Email | Url. |
 | ---- | ------ | --- |
 | Craftech |  | <https://craftech.io/> |
 
