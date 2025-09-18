@@ -8,36 +8,54 @@ jobs:
   validate-pr-description:
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Get PR Body
-        id: pr
-        uses: actions-ecosystem/action-get-merged-pull-request@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Validate PR body content
+      env:
+        PR_BODY: ${{ github.event.pull_request.body }}
+      run: |
+        echo "Checking PR body for required content..."
+        
+        # 1. Check if Summary section is filled
+        # Extract text between "## 📌 Summary" and "---" and remove whitespace.
+        SUMMARY_CONTENT=$(echo "$PR_BODY" | awk '/## 📌 Summary/,/---/' | sed '1d;$d' | tr -d '[:space:]')
+        if [ -z "$SUMMARY_CONTENT" ]; then
+          echo "Error: The 'Summary' section is empty."
+          exit 1
+        else
+          echo "Summary section is filled."
+        fi
 
-      - name: 🕵️ Validate Release Notes
-        run: |
-          BODY=$(echo "${{ steps.pr.outputs.body }}")
+        echo "Checking for checked boxes in 'Changes' section..."
 
-          echo "🔎 Checking Summary..."
-          if ! echo "$BODY" | grep -A2 "## 📌 Summary" | tail -n +2 | grep -vqE "^\s*<!--"; then
-            echo "❌ Summary section is empty"
-            exit 1
-          fi
+        # Grab section after "## 🔧 Changes"
+        CHANGES_SECTION=$(echo "$PR_BODY" | grep -A20 "## 🔧 Changes")
 
-          echo "🔎 Checking Changes..."
-          if ! echo "$BODY" | grep -q "\- \[x\]"; then
-            echo "❌ No change type has been checked"
-            exit 1
-          fi
+        # Safety: ensure section is not empty
+        if [ -z "$CHANGES_SECTION" ]; then
+          echo "❌ Error: Could not find 'Changes' section in PR body"
+          exit 1
+        else
+            echo "✅ Changes section found."
+        fi
 
-          echo "🔎 Checking Description..."
-          FEATURES=$(echo "$BODY" | awk '/### ✨ New Features/{getline; print}')
-          BUGS=$(echo "$BODY" | awk '/### 🐛 Bug Fixes/{getline; print}')
-          DOCS=$(echo "$BODY" | awk '/### 📚 Documentation/{getline; print}')
+        # Count checkboxes
+        if ! echo "$CHANGES_SECTION" | grep -q '^- \[x\]'; then
+          echo "❌ Error: No checkboxes found under 'Changes' section."
+          exit 1
+        else
+          echo "✅ At least one checkbox is checked."
+        fi
 
-          if [[ "$FEATURES" =~ ^\-$ ]] && [[ "$BUGS" =~ ^\-$ ]] && [[ "$DOCS" =~ ^\-$ ]]; then
-            echo "❌ All description sections are empty"
-            exit 1
-          fi
+        # 3. Check if one description type is filled
+        # Extract the entire "Description" section
+        DESCRIPTION_SECTION=$(echo "$PR_BODY" | sed -n '/## 📖 Description/,//p')
 
-          echo "✅ Release notes validation passed!"
+        # Check if any of the sub-sections have content.
+        # 'sed' removes the sub-headers, and 'grep' checks for any alphanumeric characters.
+        if ! echo "$DESCRIPTION_SECTION" | sed 's/###.*//' | grep -q '[[:alnum:]]'; then
+          echo "Error: At least one of the 'New Features', 'Bug Fixes', or 'Documentation' sections must be filled."
+          exit 1
+        else
+            echo "✅ At least one description section is filled."
+        fi
+
+        echo "✅ PR template validation passed. All required sections are filled correctly."
