@@ -3,6 +3,20 @@ entries:
   base-chart:
   - apiVersion: v2
     appVersion: latest
+    created: "2025-09-18T12:10:37.680330299Z"
+    description: Kubernetes Application Reduced Chart.
+    digest: 7ce77160354de6de01e0b4885b23c03fa7227de67f13eb700e7020dbffee09cd
+    keywords:
+    - base-chart
+    maintainers:
+    - name: Craftech
+      url: https://craftech.io/
+    name: base-chart
+    urls:
+    - https://github.com/avalojuan/helm-documenter/releases/download/1.0.8/base-chart-1.0.8.tgz
+    version: 1.0.8
+  - apiVersion: v2
+    appVersion: latest
     created: "2025-09-17T18:28:32.539528422Z"
     description: Kubernetes Application Reduced Chart.
     digest: 9a3c276c01f036f6138b78a87caf3810b1a8a3a8e327ad955070fdddbb710ad2
@@ -71,4 +85,4 @@ entries:
     urls:
     - https://github.com/avalojuan/helm-documenter/releases/download/base-chart-1.0.3/base-chart-1.0.3.tgz
     version: 1.0.3
-generated: "2025-09-17T18:28:32.539552808Z"
+generated: "2025-09-18T12:10:37.680358812Z"
