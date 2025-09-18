@@ -1,0 +1,29 @@
+
+
+{{ template "chart.header" . }}
+
+<img src="https://craftech.io/wp-content/uploads/2025/04/craftech.svg" />
+
+{{ template "chart.versionBadge" . }}
+
+### {{ template "chart.description" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.maintainersHeader" . }}
+
+{{ template "chart.maintainersTable" . }}
+
+## Usage
+To install the latest version of this chart, add the `avalojuanma` helm repository and run helm install:
+```bash
+$ helm repo add avalojuan https://avalojuan.github.io/helm-documenter/
+"avalojuan" has been added to your repositories
+
+$ helm install kube-app avalojuan/base-chart
+```
+
+
+{{ template "chart.valuesHeader" . }}
+
+{{ template "chart.valuesTable" . }}
