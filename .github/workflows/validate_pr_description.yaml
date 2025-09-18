@@ -19,9 +19,10 @@ jobs:
           BODY=$(echo "${{ steps.pr.outputs.body }}")
 
           echo "🔎 Checking Summary..."
-          if ! echo "$BODY" | grep -A2 "## 📌 Summary" | tail -n +2 | grep -vqE "^\s*<!--"; then
-            echo "❌ Summary section is empty"
-            exit 1
+          SUMMARY_CONTENT=$(echo "$BODY" | awk '/## 📌 Summary/{flag=1;next}/---/{flag=0}flag' | grep -vE "^\s*<!--" | grep -vE "^\s*$")
+          if [ -z "$SUMMARY_CONTENT" ]; then
+          echo "❌ Summary section is empty"
+          exit 1
           fi
 
           echo "🔎 Checking Changes..."
