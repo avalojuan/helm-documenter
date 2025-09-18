@@ -1,11 +1,12 @@
 name: Generate Release Notes
 
 on:
-  pull_request:
-    types: [opened, synchronize]
+  pull_request_review:
+    types: [submitted]
 
 jobs:
   generate-changelog:
+    if: github.event.review.state == 'approved'
     runs-on: ubuntu-latest
     defaults:
       run:
