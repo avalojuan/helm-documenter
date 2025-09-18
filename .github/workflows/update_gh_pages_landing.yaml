@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'kube-app/README.md'
 
 jobs:
   publish-readme:
@@ -27,7 +29,7 @@ jobs:
           git checkout main -- kube-app/README.md
           mv kube-app/README.md README.md
           rm -rf kube-app
-          
+
           # Configure git
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
