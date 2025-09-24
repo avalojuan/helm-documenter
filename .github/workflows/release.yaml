@@ -32,7 +32,7 @@ jobs:
 
       - name: Generate Release Notes
         id: notes
-        uses: RedCrafter07/release-notes-action@v1
+        uses: RedCrafter07/release-notes-action@v1.0.1
         with:
           tag-name: "${{ steps.chart_version.outputs.chart_version }}"
           token: ${{ secrets.GITHUB_TOKEN }}
