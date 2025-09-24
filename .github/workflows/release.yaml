@@ -43,7 +43,7 @@ jobs:
           RELEASE_NOTES="${{ steps.notes.outputs.release-notes }}"
           CHANGELOG_FILE="./kube-app/CHANGELOG.md"
           # Create temp file with release notes and existing changelog
-          { echo "$RELEASE_NOTES"; echo; cat "$CHANGELOG_FILE"; } > changelog.tmp
+          { echo "### $(date -u +"%Y-%m-%d")"; echo; echo "$RELEASE_NOTES"; echo; cat "$CHANGELOG_FILE"; } > changelog.tmp
           mv changelog.tmp "$CHANGELOG_FILE"
 
       - name: Commit updated CHANGELOG.md to main
