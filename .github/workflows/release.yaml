@@ -26,6 +26,7 @@ jobs:
       # Update Changelog
       - name: Get Chart version from Chart.yaml
         id: chart_version
+        working-directory: ./kube-app
         run: |
           CHART_VERSION=$(yq '.version' ./Chart.yaml)
           echo "chart_version=$CHART_VERSION" >> $GITHUB_OUTPUT
