@@ -23,6 +23,35 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+      # Update Changelog
+      - name: Get Chart version from Chart.yaml
+        id: chart_version
+        run: |
+          CHART_VERSION=$(yq '.version' ./Chart.yaml)
+          echo "chart_version=$CHART_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate Release Notes
+        id: notes
+        uses: RedCrafter07/release-notes-action@v1
+        with:
+          tag-name: "${{ steps.chart_version.outputs.chart_version }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepend Release Notes to CHANGELOG.md
+        run: |
+          RELEASE_NOTES="${{ steps.notes.outputs.release-notes }}"
+          CHANGELOG_FILE="./kube-app/CHANGELOG.md"
+          # Create temp file with release notes and existing changelog
+          { echo "$RELEASE_NOTES"; echo; cat "$CHANGELOG_FILE"; } > changelog.tmp
+          mv changelog.tmp "$CHANGELOG_FILE"
+
+      - name: Commit updated CHANGELOG.md to main
+        run: |
+          git add ./kube-app/CHANGELOG.md
+          git commit -m "docs: update CHANGELOG.md [skip ci]"
+          git push origin main
+
+      # Release Chart
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         with:
@@ -30,5 +59,5 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           CR_RELEASE_NAME_TEMPLATE: "{{ .Version }}"
-          CR_RELEASE_NOTES_FILE: CHANGELOG.md
+          CR_RELEASE_NOTES_FILE: RELEASE.md
           CR_GENERATE_RELEASE_NOTES: "true"

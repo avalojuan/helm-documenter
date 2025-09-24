@@ -32,21 +32,21 @@ jobs:
           EOT
           EOF
 
-      - name: Generate Release Notes CHANGELOG.md from PR body
+      - name: Generate Release Notes RELEASE.md from PR body
         run: |
           {
-            echo "# Changelog"
+            echo "# RELEASE"
             echo
             echo "### Description"
             # Use quoted variable expansion to preserve content exactly
             printf '%s\n' "$PR_BODY"
-          } > CHANGELOG.md
+          } > RELEASE.md
 
       # Commit Changes
-      - name: Commit updated README.md and CHANGELOG.md to PR
+      - name: Commit updated README.md and RELEASE.md to PR
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md CHANGELOG.md
-          git commit -m "docs: update README.md and CHANGELOG.md"
+          git add README.md RELEASE.md
+          git commit -m "docs: update README.md and RELEASE.md"
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
