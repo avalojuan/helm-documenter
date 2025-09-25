@@ -1,3 +1,11 @@
+## 🚀 2025-09-25 - Release: [1.1.6](https://github.com/avalojuan/helm-documenter/releases/tag/1.1.6)
+
+## What's Changed
+* chore: up chart version by @avalojuan in https://github.com/avalojuan/helm-documenter/pull/18
+
+
+**Full Changelog**: https://github.com/avalojuan/helm-documenter/compare/1.1.5...1.1.6
+
 ## 🚀 2025-09-25 - [Release: 1.1.6](https://github.com/avalojuan/helm-documenter/releases/tag/1.1.6)
 
 ## What's Changed
