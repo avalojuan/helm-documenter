@@ -35,10 +35,6 @@ jobs:
       - name: Generate Release Notes RELEASE.md from PR body
         run: |
           {
-            echo "# RELEASE"
-            echo
-            echo "### Description"
-            # Use quoted variable expansion to preserve content exactly
             printf '%s\n' "$PR_BODY"
           } > RELEASE.md
 
