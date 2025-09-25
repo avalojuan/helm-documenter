@@ -31,6 +31,30 @@ jobs:
           CHART_VERSION=$(yq '.version' ./Chart.yaml)
           echo "chart_version=$CHART_VERSION" >> $GITHUB_OUTPUT
 
+      - name: Get latest release version
+        id: latest_release
+        run: |
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+      - name: Set Release Title
+        id: release_title
+        run: |
+          CHART_VERSION="${{ steps.chart_version.outputs.chart_version }}"
+          LATEST_VERSION="${{ steps.latest_release.outputs.latest_tag }}"
+          IFS='.' read -r CHART_MAJOR CHART_MINOR CHART_PATCH <<< "$CHART_VERSION"
+          IFS='.' read -r LATEST_MAJOR LATEST_MINOR LATEST_PATCH <<< "$LATEST_VERSION"
+          if [ "$CHART_MAJOR" != "$LATEST_MAJOR" ]; then
+            TITLE="Breaking Change: v$CHART_VERSION"
+          elif [ "$CHART_MINOR" != "$LATEST_MINOR" ]; then
+            TITLE="Enhancement: v$CHART_VERSION"
+          elif [ "$CHART_PATCH" != "$LATEST_PATCH" ]; then
+            TITLE="Fix: v$CHART_VERSION"
+          else
+            TITLE="Release: v$CHART_VERSION"
+          fi
+          echo "release_title=$TITLE" >> $GITHUB_OUTPUT
+
       - name: Generate Release Notes
         id: notes
         uses: RedCrafter07/release-notes-action@v1.0.1
@@ -41,9 +65,10 @@ jobs:
       - name: Prepend Release Notes to CHANGELOG.md
         run: |
           RELEASE_NOTES="${{ steps.notes.outputs.release-notes }}"
+          RELEASE_TITLE="${{ steps.release_title.outputs.release_title }}"
           CHANGELOG_FILE="./kube-app/CHANGELOG.md"
           # Create temp file with release notes and existing changelog
-          { echo "### $(date -u +"%Y-%m-%d")"; echo; echo "$RELEASE_NOTES"; echo; cat "$CHANGELOG_FILE"; } > changelog.tmp
+          { echo "## $(date -u +"%Y-%m-%d")"; echo; echo "$RELEASE_TITLE"; echo; echo "$RELEASE_NOTES"; echo; cat "$CHANGELOG_FILE"; } > changelog.tmp
           mv changelog.tmp "$CHANGELOG_FILE"
 
       - name: Commit updated CHANGELOG.md to main
