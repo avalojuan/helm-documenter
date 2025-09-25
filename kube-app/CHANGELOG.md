@@ -1,3 +1,9 @@
+## 2025-09-25
+
+Fix: v1.1.5
+
+**Full Changelog**: https://github.com/avalojuan/helm-documenter/compare/1.1.4...1.1.5
+
 ### 2025-09-24
 
 ## What's Changed
