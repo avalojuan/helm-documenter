@@ -1,3 +1,11 @@
+## ✨ 2025-09-25 - Enhancement: [1.2.0](https://github.com/avalojuan/helm-documenter/releases/tag/1.2.0)
+
+## What's Changed
+* test: enhacement changelog by @avalojuan in https://github.com/avalojuan/helm-documenter/pull/19
+
+
+**Full Changelog**: https://github.com/avalojuan/helm-documenter/compare/1.1.6...1.2.0
+
 ## 🚀 2025-09-25 - Release: [1.1.6](https://github.com/avalojuan/helm-documenter/releases/tag/1.1.6)
 
 ## What's Changed
