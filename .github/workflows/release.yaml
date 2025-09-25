@@ -23,7 +23,7 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      # Update Changelog
+      # 1- Update Changelog
       - name: Get Chart version from Chart.yaml
         id: chart_version
         working-directory: ./kube-app
@@ -37,6 +37,8 @@ jobs:
           LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
+      # Based on semantic versioning, set the release title 
+      # (MAJOR, MINOR, PATCH) => (Breaking Change, Enhancement, Fix)
       - name: Set Release Title
         id: release_title
         run: |
@@ -68,7 +70,7 @@ jobs:
           RELEASE_TITLE="${{ steps.release_title.outputs.release_title }}"
           CHANGELOG_FILE="./kube-app/CHANGELOG.md"
           # Create temp file with release notes and existing changelog
-          { echo "## $(date -u +"%Y-%m-%d")"; echo; echo "$RELEASE_TITLE"; echo; echo "$RELEASE_NOTES"; echo; cat "$CHANGELOG_FILE"; } > changelog.tmp
+          { echo "## $(date -u +"%Y-%m-%d") - $RELEASE_TITLE"; echo; echo "$RELEASE_NOTES"; echo; cat "$CHANGELOG_FILE"; } > changelog.tmp
           mv changelog.tmp "$CHANGELOG_FILE"
 
       - name: Commit updated CHANGELOG.md to main
