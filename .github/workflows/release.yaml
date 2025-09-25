@@ -47,15 +47,20 @@ jobs:
           IFS='.' read -r CHART_MAJOR CHART_MINOR CHART_PATCH <<< "$CHART_VERSION"
           IFS='.' read -r LATEST_MAJOR LATEST_MINOR LATEST_PATCH <<< "$LATEST_VERSION"
           if [ "$CHART_MAJOR" != "$LATEST_MAJOR" ]; then
-            TITLE="Breaking Change: v$CHART_VERSION"
+            TITLE="Breaking Change: $CHART_VERSION"
+            ICON="💥"
           elif [ "$CHART_MINOR" != "$LATEST_MINOR" ]; then
-            TITLE="Enhancement: v$CHART_VERSION"
+            TITLE="Enhancement: $CHART_VERSION"
+            ICON="✨"
           elif [ "$CHART_PATCH" != "$LATEST_PATCH" ]; then
-            TITLE="Fix: v$CHART_VERSION"
+            TITLE="Fix: $CHART_VERSION"
+            ICON="🐛"
           else
-            TITLE="Release: v$CHART_VERSION"
+            TITLE="Release: $CHART_VERSION"
+            ICON="🚀"
           fi
           echo "release_title=$TITLE" >> $GITHUB_OUTPUT
+          echo "release_icon=$ICON" >> $GITHUB_OUTPUT
 
       - name: Generate Release Notes
         id: notes
@@ -66,11 +71,13 @@ jobs:
 
       - name: Prepend Release Notes to CHANGELOG.md
         run: |
+          CHANGELOG_FILE="./kube-app/CHANGELOG.md"
           RELEASE_NOTES="${{ steps.notes.outputs.release-notes }}"
           RELEASE_TITLE="${{ steps.release_title.outputs.release_title }}"
-          CHANGELOG_FILE="./kube-app/CHANGELOG.md"
+          RELEASE_ICON="${{ steps.release_title.outputs.release_icon }}"
+          RELEASE_LINK="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${{ steps.chart_version.outputs.chart_version }}"
           # Create temp file with release notes and existing changelog
-          { echo "## $(date -u +"%Y-%m-%d") - $RELEASE_TITLE"; echo; echo "$RELEASE_NOTES"; echo; cat "$CHANGELOG_FILE"; } > changelog.tmp
+            { echo "## $RELEASE_ICON $(date -u +"%Y-%m-%d") - [$RELEASE_TITLE]($RELEASE_LINK)"; echo; echo "$RELEASE_NOTES"; echo; cat "$CHANGELOG_FILE"; } > changelog.tmp
           mv changelog.tmp "$CHANGELOG_FILE"
 
       - name: Commit updated CHANGELOG.md to main
