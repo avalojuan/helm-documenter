@@ -44,19 +44,21 @@ jobs:
         run: |
           CHART_VERSION="${{ steps.chart_version.outputs.chart_version }}"
           LATEST_VERSION="${{ steps.latest_release.outputs.latest_tag }}"
+          RELEASE_LINK="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${CHART_VERSION}"
+          VERSION_TITLE="[$CHART_VERSION]($RELEASE_LINK)"
           IFS='.' read -r CHART_MAJOR CHART_MINOR CHART_PATCH <<< "$CHART_VERSION"
           IFS='.' read -r LATEST_MAJOR LATEST_MINOR LATEST_PATCH <<< "$LATEST_VERSION"
           if [ "$CHART_MAJOR" != "$LATEST_MAJOR" ]; then
-            TITLE="Breaking Change: $CHART_VERSION"
+            TITLE="Breaking Change: $VERSION_TITLE"
             ICON="💥"
           elif [ "$CHART_MINOR" != "$LATEST_MINOR" ]; then
-            TITLE="Enhancement: $CHART_VERSION"
+            TITLE="Enhancement: $VERSION_TITLE"
             ICON="✨"
           elif [ "$CHART_PATCH" != "$LATEST_PATCH" ]; then
-            TITLE="Fix: $CHART_VERSION"
+            TITLE="Fix: $VERSION_TITLE"
             ICON="🐛"
           else
-            TITLE="Release: $CHART_VERSION"
+            TITLE="Release: $VERSION_TITLE"
             ICON="🚀"
           fi
           echo "release_title=$TITLE" >> $GITHUB_OUTPUT
@@ -77,7 +79,7 @@ jobs:
           RELEASE_ICON="${{ steps.release_title.outputs.release_icon }}"
           RELEASE_LINK="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${{ steps.chart_version.outputs.chart_version }}"
           # Create temp file with release notes and existing changelog
-            { echo "## $RELEASE_ICON $(date -u +"%Y-%m-%d") - [$RELEASE_TITLE]($RELEASE_LINK)"; echo; echo "$RELEASE_NOTES"; echo; cat "$CHANGELOG_FILE"; } > changelog.tmp
+            { echo "## $RELEASE_ICON $(date -u +"%Y-%m-%d") - $RELEASE_TITLE"; echo; echo "$RELEASE_NOTES"; echo; cat "$CHANGELOG_FILE"; } > changelog.tmp
           mv changelog.tmp "$CHANGELOG_FILE"
 
       - name: Commit updated CHANGELOG.md to main
